@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Pages 테스트</title>
+  <style>
+    :root {
+      --bg: #f6f8fa;
+      --card: #ffffff;
+      --text: #1f2328;
+      --muted: #656d76;
+      --border: #d0d7de;
+      --accent: #0969da;
+      --ok: #1a7f37;
+      --fail: #cf222e;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0d1117;
+        --card: #161b22;
+        --text: #e6edf3;
+        --muted: #8d96a0;
+        --border: #30363d;
+        --accent: #4493f8;
+        --ok: #3fb950;
+        --fail: #f85149;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 2rem 1rem;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      line-height: 1.6;
+    }
+    main { max-width: 640px; margin: 0 auto; }
+    h1 { margin: 0 0 .25rem; font-size: 1.75rem; }
+    .sub { margin: 0 0 1.5rem; color: var(--muted); }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .card h2 { margin: 0 0 .75rem; font-size: 1rem; }
+    ul.checks { list-style: none; margin: 0; padding: 0; }
+    ul.checks li { display: flex; justify-content: space-between; padding: .35rem 0; border-bottom: 1px dashed var(--border); }
+    ul.checks li:last-child { border-bottom: 0; }
+    .ok { color: var(--ok); font-weight: 600; }
+    .fail { color: var(--fail); font-weight: 600; }
+    .pending { color: var(--muted); }
+    dl { margin: 0; display: grid; grid-template-columns: 7rem 1fr; gap: .35rem .75rem; font-size: .92rem; }
+    dt { color: var(--muted); }
+    dd { margin: 0; word-break: break-all; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    button {
+      font: inherit;
+      padding: .5rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+    }
+    button:hover { opacity: .9; }
+    #count { font-size: 1.25rem; font-weight: 700; margin-left: .75rem; }
+    footer { text-align: center; color: var(--muted); font-size: .85rem; margin-top: 1.5rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>🚀 GitHub Pages 테스트</h1>
+    <p class="sub">이 페이지가 보인다면 배포가 정상적으로 된 것입니다.</p>
+
+    <section class="card">
+      <h2>자동 점검</h2>
+      <ul class="checks">
+        <li><span>HTML 로드</span><span class="ok">✔ 성공</span></li>
+        <li><span>CSS 적용</span><span id="chk-css" class="pending">확인 중…</span></li>
+        <li><span>JavaScript 실행</span><span id="chk-js" class="pending">확인 중…</span></li>
+        <li><span>HTTPS 연결</span><span id="chk-https" class="pending">확인 중…</span></li>
+        <li><span>같은 경로 fetch</span><span id="chk-fetch" class="pending">확인 중…</span></li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>접속 정보</h2>
+      <dl>
+        <dt>URL</dt><dd id="info-url">-</dd>
+        <dt>호스트</dt><dd id="info-host">-</dd>
+        <dt>경로</dt><dd id="info-path">-</dd>
+        <dt>페이지 종류</dt><dd id="info-kind">-</dd>
+        <dt>현재 시각</dt><dd id="info-time">-</dd>
+        <dt>로드 시간</dt><dd id="info-load">-</dd>
+      </dl>
+    </section>
+
+    <section class="card">
+      <h2>인터랙션 테스트</h2>
+      <button id="btn">클릭!</button>
+      <span id="count">0</span>
+    </section>
+
+    <footer>GitHub Pages deployment test · <span id="year"></span></footer>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const set = (id, ok, text) => {
+      const el = $(id);
+      el.className = ok ? "ok" : "fail";
+      el.textContent = (ok ? "✔ " : "✘ ") + text;
+    };
+
+    // JS 실행
+    set("chk-js", true, "성공");
+
+    // CSS 적용 여부 (CSS 변수가 해석되는지 확인)
+    const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim();
+    set("chk-css", !!accent, accent ? "성공" : "실패");
+
+    // HTTPS
+    const isHttps = location.protocol === "https:";
+    set("chk-https", isHttps, isHttps ? "성공" : "http (로컬 파일/로컬 서버)");
+
+    // 같은 경로 fetch (정적 파일 서빙 확인)
+    fetch(location.pathname, { cache: "no-store" })
+      .then((r) => set("chk-fetch", r.ok, r.ok ? `성공 (HTTP ${r.status})` : `HTTP ${r.status}`))
+      .catch(() => set("chk-fetch", false, "실패 (file:// 로 열면 정상)"));
+
+    // 접속 정보
+    $("info-url").textContent = location.href;
+    $("info-host").textContent = location.host || "(로컬 파일)";
+    $("info-path").textContent = location.pathname;
+
+    const onGhPages = location.hostname.endsWith(".github.io");
+    const firstSeg = location.pathname.split("/").filter(Boolean)[0];
+    $("info-kind").textContent = !onGhPages
+      ? "github.io 아님 (로컬 또는 커스텀 도메인)"
+      : firstSeg && !firstSeg.endsWith(".html")
+        ? `프로젝트 페이지 (/${firstSeg}/)`
+        : "사용자/조직 페이지 (루트)";
+
+    $("info-time").textContent = new Date().toLocaleString("ko-KR", { timeZoneName: "short" });
+    window.addEventListener("load", () => {
+      const nav = performance.getEntriesByType("navigation")[0];
+      $("info-load").textContent = nav ? `${Math.round(nav.loadEventStart || nav.duration)} ms` : "-";
+    });
+
+    // 카운터
+    let n = 0;
+    $("btn").addEventListener("click", () => { $("count").textContent = ++n; });
+
+    $("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
